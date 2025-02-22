@@ -2,12 +2,12 @@ name: Publish Docker Image
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    
+
     permissions:
       packages: write
 
@@ -33,6 +33,7 @@ jobs:
         with:
           context: .
           push: true
+          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
           tags: |
             ${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:latest
