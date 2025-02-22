@@ -13,7 +13,7 @@ USER node
 VOLUME [ "/app" ]
 
 FROM base
-COPY ecosystem.config.cjs index.js package.json package-lock.json ./
+COPY ecosystem.config.cjs index.js package.json ./
 RUN npm install --omit=dev
 ENV GATEWAY_URL=wss://ebfaa96d.talkops.app
 ENV PUBLISHER_URL=https://b62b3726.talkops.app
