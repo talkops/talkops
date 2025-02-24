@@ -1,4 +1,4 @@
-[[https://pic.talkops.app/talkops-logo.svg]]
+![TalkOps GitHub Logo](https://pic.talkops.app/talkops-github-logo.svg)
 
 # TalkOps - Interact with Your Applications by Voice! 🗣️💡
 
