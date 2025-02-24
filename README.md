@@ -21,6 +21,4 @@
 - **Wake Word (activation keyword)**: Wake up the agent with a custom keyword.
 - **Interoperability**: Connect TalkOps to your other tools and automate your tasks.
 
----
-
 # [Let's start! 🚀](https://link.talkops.app/start)
