@@ -2,8 +2,7 @@
 
 # TalkOps - Interact with Your Applications by Voice!
 
-**TalkOps** is an innovative platform that allows you to control your applications via voice or text.
-Thanks to its **modular and scalable** architecture, you can enhance your experience according to your needs by adding **Extensions**.
+**TalkOps** is an innovative platform that allows you to control your applications via voice or text. Thanks to its **modular architecture**, you can enhance your experience according to your needs by adding **[Extensions](https://link.talkops.app/extensions)**.
 
 ## 💡 Why TalkOps?
 
