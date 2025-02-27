@@ -12,16 +12,16 @@ const wss = new WebSocketServer({ port: process.env.PORT });
 function getClients() {
   return [...wss.clients].filter(
     (client) =>
-      client.readyState === WebSocket.OPEN && client.services !== undefined
+      client.readyState === WebSocket.OPEN && client.service !== undefined
   );
 }
 
 function getServices() {
-  return getClients().map((client) => client.services);
+  return getClients().map((client) => client.service);
 }
 
 function getClientsWithServices() {
-  return getClients().map((client) => ({ client, services: client.services }));
+  return getClients().map((client) => ({ client, services: client.service }));
 }
 
 function getClientsWithModules() {
@@ -42,7 +42,7 @@ function getClientsWithFunctionSchemas() {
   );
 }
 
-function getClientsByFunctionName(name) {
+function getClientsByFunctionSchemaName(name) {
   return [
     ...new Set(
       getClientsWithFunctionSchemas()
@@ -55,13 +55,24 @@ function getClientsByFunctionName(name) {
 wss.on("connection", (client) => {
   client.on("message", (message) => {
     const data = JSON.parse(message);
-    if (data.type !== undefined && data.type === "function_call") {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(message);
-      }
+    if (data.type === "function_call" && ws?.readyState === WebSocket.OPEN) {
+      ws.send(message);
       return;
     }
-    client.services = data;
+    if (!data.sdk || !data.modules) return;
+    data.modules.forEach((module) => {
+      if (module.type !== "Extension") return;
+      const extension = module;
+      if (!extension.functionSchemas.length) return;
+      extension.functionSchemas.forEach(
+        (schema) => (schema.name = `${schema.name}_${extension.id}`)
+      );
+      module.instructions = `**The functions related to this extension are suffixed by "_${extension.id}"**.\n\n${module.instructions}`;
+    });
+    client.service = data;
+  });
+  client.on("close", () => {
+    delete client.service;
   });
 });
 
@@ -97,7 +108,7 @@ function connect() {
       return;
     }
     if (data.type === "function_call") {
-      getClientsByFunctionName(data.name).forEach((client) => {
+      getClientsByFunctionSchemaName(data.name).forEach((client) => {
         client.send(message);
       });
     }
