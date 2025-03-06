@@ -76,20 +76,27 @@ wss.on("connection", (client) => {
   });
 });
 
-const key = process.env.KEY;
+let agentKey = process.env.KEY;
 
-if (key === undefined) {
+if (agentKey === undefined) {
   console.error("The variable environment KEY is required.");
   process.exit(1);
 }
 
-if (!isuuidv4(key)) {
+if (typeof agentKey !== "string") {
+  console.error("The variable environment KEY must be a string.");
+  process.exit(1);
+}
+
+agentKey = agentKey.trim().toLowerCase();
+
+if (!isuuidv4(agentKey)) {
   console.error("The variable environment KEY must be a UUID v4.");
   process.exit(1);
 }
 
-console.log(`Agent Key: ${key}`);
-qrcode.generate(key, { small: true }, (qr) => console.log(qr));
+console.log(`Agent Key: ${agentKey}`);
+qrcode.generate(agentKey, { small: true }, (qr) => console.log(qr));
 
 let ws = null;
 function connect() {
@@ -98,7 +105,7 @@ function connect() {
     ws.send(
       JSON.stringify({
         type: "login",
-        key,
+        agentKey,
       })
     );
   });
@@ -136,7 +143,7 @@ async function updateAgent() {
   }
   try {
     await axios.put(process.env.PUBLISHER_URL, agent, {
-      headers: { "x-key": key },
+      headers: { "x-agent-key": agentKey },
     });
   } catch (error) {
     console.error(error.message);
