@@ -17,7 +17,7 @@
 - **Real-time AI Agent**: An artificial intelligence ready to respond to your voice and text commands.
 - **Extensions**: Customize your experience by integrating dedicated extensions.
 - **Deployment via Docker**: Quick and hassle-free setup.
-- **PWA (Progressive Web App)**: An interface accessible everywhere, on all your devices.
+- **Progressive Web App**: An interface accessible everywhere, on all your devices.
 - **Wake Word (activation keyword)**: Wake up the agent with a custom keyword.
 - **Interoperability**: Connect TalkOps to your other tools and automate your tasks.
 
