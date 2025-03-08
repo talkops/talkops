@@ -10,7 +10,7 @@
 - **Unmatched flexibility**: Add new extensions on the fly with a **Docker-based** modular system.
 - **Simplified installation**: Deploy TalkOps in just a few minutes and start using it immediately.
 - **An open ecosystem**: Create and share your own Extensions with the community.
-- **Secure and self-hosted**: Keep full control of your data without relying on third-party services.
+- **Secure and self-hosted**: Keep full control of your data.
 
 ## 🎯 Main Features
 
