@@ -67,7 +67,7 @@ function connect() {
         if (client.readyState !== WebSocket.OPEN) continue;
         if (client.service === undefined) continue;
         for (const module of client.service.modules) {
-          if (module.type !== 'Extension') continue;
+          if (module.type !== "Extension") continue;
           if (module.name !== data.extensionName) continue;
           for (const functionSchema of module.functionSchemas) {
             if (data.name !== functionSchema.name) continue;
@@ -83,35 +83,35 @@ function connect() {
 }
 connect();
 
-let lastHash = null;
-async function updateAgent() {
+const agent = {
+  defaultName,
+  version: pkg.version,
+  services: [],
+};
+async function update() {
   const services = [];
   for (const client of [...wss.clients]) {
     if (client.readyState !== WebSocket.OPEN) continue;
     if (client.service === undefined) continue;
-    services.push(client.service)
+    services.push(client.service);
   }
-  const agent = {
-    defaultName,
-    version: pkg.version,
-    services
-  };
-  const hash = crypto
-    .createHash("sha256")
-    .update(JSON.stringify(agent))
-    .digest("hex");
-  if (lastHash === hash) {
-    setTimeout(updateAgent, 500);
-    return;
+  if (
+    services.length !== agent.services.length ||
+    services.some((service, i) => service !== agent.services[i])
+  ) {
+    agent.services = services;
+    try {
+      await axios.put(process.env.PUBLISHER_URL, agent, {
+        headers: { "x-agent-key": agentKey },
+      });
+      setTimeout(update, 1000);
+      return;
+    } catch (error) {
+      console.error(error.message);
+      setTimeout(update, 5000);
+      return;
+    }
   }
-  try {
-    await axios.put(process.env.PUBLISHER_URL, agent, {
-      headers: { "x-agent-key": agentKey },
-    });
-  } catch (error) {
-    console.error(error.message);
-  }
-  lastHash = hash;
-  setTimeout(updateAgent, 1000);
+  setTimeout(update, 500);
 }
-updateAgent();
+setTimeout(update, 2000);
