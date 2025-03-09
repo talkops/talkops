@@ -1,9 +1,8 @@
 import { v4 as isuuidv4 } from "is-uuid";
-import crypto from "crypto";
 import qrcode from "qrcode-terminal";
 import WebSocket, { WebSocketServer } from "ws";
 import axios from "axios";
-import pkg from "./package.json" assert { type: "json" };
+import pkg from "./package.json" with { type: "json" };
 
 const defaultName = process.env.DEFAULT_NAME;
 
