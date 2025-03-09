@@ -1,4 +1,4 @@
-FROM node:20-slim AS base
+FROM node:23.9-slim AS base
 ENV NODE_NO_WARNINGS=1
 RUN npm install -g pm2
 RUN mkdir /app && chown node:node /app
