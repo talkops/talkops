@@ -9,49 +9,6 @@ const defaultName = process.env.DEFAULT_NAME;
 
 const wss = new WebSocketServer({ port: process.env.PORT });
 
-function getClients() {
-  return [...wss.clients].filter(
-    (client) =>
-      client.readyState === WebSocket.OPEN && client.service !== undefined
-  );
-}
-
-function getServices() {
-  return getClients().map((client) => client.service);
-}
-
-function getClientsWithServices() {
-  return getClients().map((client) => ({ client, services: client.service }));
-}
-
-function getClientsWithModules() {
-  return getClientsWithServices().flatMap(({ client, services }) =>
-    services.modules.map((module) => ({ client, module }))
-  );
-}
-
-function getClientsWithExtensions() {
-  return getClientsWithModules().filter(
-    ({ module }) => module.type === "Extension"
-  );
-}
-
-function getClientsWithFunctionSchemas() {
-  return getClientsWithExtensions().flatMap(({ client, module }) =>
-    module.functionSchemas.map((fn) => ({ client, fn }))
-  );
-}
-
-function getClientsByFunctionSchemaName(name) {
-  return [
-    ...new Set(
-      getClientsWithFunctionSchemas()
-        .filter(({ fn }) => fn.name === name)
-        .map(({ client }) => client)
-    ),
-  ];
-}
-
 wss.on("connection", (client) => {
   client.on("message", (message) => {
     const data = JSON.parse(message);
@@ -60,15 +17,6 @@ wss.on("connection", (client) => {
       return;
     }
     if (!data.sdk || !data.modules) return;
-    data.modules.forEach((module) => {
-      if (module.type !== "Extension") return;
-      const extension = module;
-      if (!extension.functionSchemas.length) return;
-      extension.functionSchemas.forEach(
-        (schema) => (schema.name = `${schema.name}_${extension.id}`)
-      );
-      module.instructions = `**The functions related to this extension are suffixed by "_${extension.id}"**.\n\n${module.instructions}`;
-    });
     client.service = data;
   });
   client.on("close", () => {
@@ -115,9 +63,18 @@ function connect() {
       return;
     }
     if (data.type === "function_call") {
-      getClientsByFunctionSchemaName(data.name).forEach((client) => {
-        client.send(message);
-      });
+      for (const client of [...wss.clients]) {
+        if (client.readyState !== WebSocket.OPEN) continue;
+        if (client.service === undefined) continue;
+        for (const module of client.service.modules) {
+          if (module.type !== 'Extension') continue;
+          if (module.name !== data.extensionName) continue;
+          for (const functionSchema of module.functionSchemas) {
+            if (data.name !== functionSchema.name) continue;
+            client.send(message);
+          }
+        }
+      }
     }
   });
   ws.on("close", () => {
@@ -128,10 +85,16 @@ connect();
 
 let lastHash = null;
 async function updateAgent() {
+  const services = [];
+  for (const client of [...wss.clients]) {
+    if (client.readyState !== WebSocket.OPEN) continue;
+    if (client.service === undefined) continue;
+    services.push(client.service)
+  }
   const agent = {
     defaultName,
     version: pkg.version,
-    services: getServices(),
+    services
   };
   const hash = crypto
     .createHash("sha256")
