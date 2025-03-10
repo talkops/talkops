@@ -11,7 +11,7 @@ const wss = new WebSocketServer({ port: process.env.PORT });
 wss.on("connection", (client) => {
   client.on("message", (message) => {
     const data = JSON.parse(message);
-    if (data.type === "function_call" && ws?.readyState === WebSocket.OPEN) {
+    if (data.type && ws?.readyState === WebSocket.OPEN) {
       ws.send(message);
       return;
     }
